@@ -1,0 +1,10 @@
+Package: com.yourcompany.wctimelinesightretweet
+Name: WCTimelineSightRetweet
+Depends: mobilesubstrate
+Architecture: iphoneos-arm
+Description: An awesome MobileSubstrate tweak!
+Maintainer: leonlei
+Author: leonlei
+Section: Tweaks
+Version: 0.0.1-54+debug
+Installed-Size: 76
