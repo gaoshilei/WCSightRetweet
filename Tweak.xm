@@ -2,7 +2,7 @@
 static  WCTimeLineViewController *WCTimelineVC = nil;
 %hook WCContentItemViewTemplateNewSight
 %new
-- (id)iOSREMediaItemFromSight
+- (id)SLSightDataItem
 {
     id responder = self;
     MMTableViewCell *SightCell = nil;
@@ -33,24 +33,24 @@ static  WCTimeLineViewController *WCTimelineVC = nil;
 }
 
 %new
-- (void)iOSREOnSaveToDisk
+- (void)SLSightSaveToDisk
 {
-    NSString *localPath = [[self iOSREMediaItemFromSight] pathForSightData];
+    NSString *localPath = [[self SLSightDataItem] pathForSightData];
     UISaveVideoAtPathToSavedPhotosAlbum(localPath, nil, nil, nil);
 }
 
 %new
-- (void)iOSREOnCopyURL
+- (void)SLSightCopyUrl
 {
     UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-    pasteboard.string = [self iOSREMediaItemFromSight].dataUrl.url;
+    pasteboard.string = [self SLSightDataItem].dataUrl.url;
 }
 
 %new
-- (void)RetweetSight
+- (void)SLRetweetSight
 {
     SightMomentEditViewController *editSightVC = [[%c(SightMomentEditViewController) alloc] init];
-    NSString *localPath = [[self iOSREMediaItemFromSight] pathForSightData];
+    NSString *localPath = [[self SLSightDataItem] pathForSightData];
     UIImage *image = [[self valueForKey:@"_sightView"] getImage];
     [editSightVC setRealMoviePath:localPath];
     [editSightVC setMoviePath:localPath];
@@ -62,24 +62,23 @@ static  WCTimeLineViewController *WCTimelineVC = nil;
 }
 
 %new
-- (void)SendToFriends
+- (void)SLSightSendToFriends
 {
     [self sendSightToFriend];
 }
 
-static int iOSRECounter;
+
 - (void)onLongTouch
 {
-    iOSRECounter++;
-    if (iOSRECounter % 2 == 0) return;
+    UIMenuController *menuController = [UIMenuController sharedMenuController];
+    if (menuController.isMenuVisible) return;//防止出现menu闪屏的情况
     [self becomeFirstResponder];
     NSString *localPath = [[self iOSREMediaItemFromSight] pathForSightData];
     BOOL isExist =[[NSFileManager defaultManager] fileExistsAtPath:localPath];
-    UIMenuItem *retweetMenuItem = [[UIMenuItem alloc] initWithTitle:@"朋友圈" action:@selector(RetweetSight)];
-    UIMenuItem *saveToDiskMenuItem = [[UIMenuItem alloc] initWithTitle:@"保存到相册" action:@selector(iOSREOnSaveToDisk)];
-    UIMenuItem *sendToFriendsMenuItem = [[UIMenuItem alloc] initWithTitle:@"好友" action:@selector(SendToFriends)];
-    UIMenuItem *copyURLMenuItem = [[UIMenuItem alloc] initWithTitle:@"复制链接" action:@selector(iOSREOnCopyURL)];
-    UIMenuController *menuController = [UIMenuController sharedMenuController];
+    UIMenuItem *retweetMenuItem = [[UIMenuItem alloc] initWithTitle:@"朋友圈" action:@selector(SLRetweetSight)];
+    UIMenuItem *saveToDiskMenuItem = [[UIMenuItem alloc] initWithTitle:@"保存到相册" action:@selector(SLSightSaveToDisk)];
+    UIMenuItem *sendToFriendsMenuItem = [[UIMenuItem alloc] initWithTitle:@"好友" action:@selector(SLSightSendToFriends)];
+    UIMenuItem *copyURLMenuItem = [[UIMenuItem alloc] initWithTitle:@"复制链接" action:@selector(SLSightCopyUrl)];
     if(isExist){
         [menuController setMenuItems:@[retweetMenuItem,sendToFriendsMenuItem,saveToDiskMenuItem,copyURLMenuItem]];
     }else{
